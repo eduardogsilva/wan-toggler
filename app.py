@@ -15,6 +15,7 @@ SCRIPT_WAN1 = os.getenv('SCRIPT_WAN1')
 SCRIPT_WAN2 = os.getenv('SCRIPT_WAN2')
 SCRIPT_TOGGLE = os.getenv('SCRIPT_TOGGLE')
 SCRIPT_CHECK = os.getenv('SCRIPT_CHECK')
+HTML_REFRESH = int(os.getenv('HTML_REFRESH', 0))
 
 ROUTER_IP = os.getenv('ROUTER_IP')
 ROUTER_USER = os.getenv('ROUTER_USER')
@@ -52,7 +53,7 @@ def check_current_isp():
 def index():
     current_isp = check_current_isp()
     error = request.args.get('error')
-    return render_template('index.html', isp=current_isp, wan1_name=WAN1_NAME, wan2_name=WAN2_NAME, error=error)
+    return render_template('index.html', isp=current_isp, wan1_name=WAN1_NAME, wan2_name=WAN2_NAME, error=error, refresh=HTML_REFRESH)
 
 @app.route('/toggle')
 def toggle_isp():
