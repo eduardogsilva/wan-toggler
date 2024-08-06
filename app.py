@@ -9,15 +9,16 @@ app = Flask(__name__)
 
 WAN1_NAME = os.getenv('WAN1_NAME')
 WAN2_NAME = os.getenv('WAN2_NAME')
+WAN1_INTERFACE = os.getenv('WAN1_INTERFACE')
+WAN2_INTERFACE = os.getenv('WAN2_INTERFACE')
 SCRIPT_WAN1 = os.getenv('SCRIPT_WAN1')
 SCRIPT_WAN2 = os.getenv('SCRIPT_WAN2')
 SCRIPT_TOGGLE = os.getenv('SCRIPT_TOGGLE')
+SCRIPT_CHECK = os.getenv('SCRIPT_CHECK')
 
 ROUTER_IP = os.getenv('ROUTER_IP')
 ROUTER_USER = os.getenv('ROUTER_USER')
 ROUTER_PASSWORD = os.getenv('ROUTER_PASSWORD')
-
-current_isp = WAN1_NAME  # Inicialmente configurado para WAN1_NAME
 
 def execute_script(script_name):
     try:
@@ -37,36 +38,39 @@ def execute_script(script_name):
     except Exception as e:
         return str(e)
 
+def check_current_isp():
+    output = execute_script(SCRIPT_CHECK)
+    if '%' in output:
+        interface = output.split('%')[1].strip()
+        if interface == WAN1_INTERFACE:
+            return WAN1_NAME
+        elif interface == WAN2_INTERFACE:
+            return WAN2_NAME
+    return output
+
 @app.route('/')
 def index():
+    current_isp = check_current_isp()
     error = request.args.get('error')
     return render_template('index.html', isp=current_isp, wan1_name=WAN1_NAME, wan2_name=WAN2_NAME, error=error)
 
 @app.route('/toggle')
 def toggle_isp():
-    global current_isp
     error = execute_script(SCRIPT_TOGGLE)
     if error:
         return redirect(url_for('index', error=error))
-    if current_isp == WAN1_NAME:
-        current_isp = WAN2_NAME
-    else:
-        current_isp = WAN1_NAME
     return redirect(url_for('index'))
 
 @app.route('/set/<wan>')
 def set_isp(wan):
-    global current_isp
     if wan == 'WAN1':
         error = execute_script(SCRIPT_WAN1)
         if error:
             return redirect(url_for('index', error=error))
-        current_isp = WAN1_NAME
     elif wan == 'WAN2':
         error = execute_script(SCRIPT_WAN2)
         if error:
             return redirect(url_for('index', error=error))
-        current_isp = WAN2_NAME
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
