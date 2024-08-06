@@ -1,0 +1,7 @@
+:local route [/ip route find dst-address=0.0.0.0/0 distance=20]
+:if ([:len $route] > 0) do={
+    :local interfaceName [/ip route get $route  immediate-gw]
+    :put $interfaceName
+} else={
+    :put "No route found with distance 20"
+}

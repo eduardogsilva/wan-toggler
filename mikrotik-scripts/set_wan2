@@ -1,0 +1,2 @@
+/ip dhcp-client set WAN1 default-route-distance=25
+/ip dhcp-client set WAN2 default-route-distance=20

@@ -1,0 +1,3 @@
+/ip dhcp-client set [find default-route-distance=20] default-route-distance=24
+/ip dhcp-client set [find default-route-distance=25] default-route-distance=20
+/ip dhcp-client set [find default-route-distance=24] default-route-distance=25

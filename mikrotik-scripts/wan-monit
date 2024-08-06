@@ -1,0 +1,32 @@
+# This is a bonus script. You can schedule this script to run every 5 minutes to monitor the WAN connection.
+# It will ping both google and cloudflare DNS servers. If any of them fails, it will retry two more times.
+# After that, it will run the wan-toggle script to change the routes and send an email report.
+
+:local primaryIP "1.1.1.1";
+:local secondaryIP "8.8.8.8";
+:local count 5;
+:local delayPeriod 10;
+:local attempt 1;
+:local isFailed false;
+
+:while ($attempt <= 3 && $isFailed = false) do={
+    :local primaryPingResult [/ping $primaryIP count=$count];
+    :local secondaryPingResult [/ping $secondaryIP count=$count];
+
+    :if ($primaryPingResult = 0 || $secondaryPingResult = 0) do={
+        :log warning "wan-monit: Falha na Conexão WAN no teste $attempt";
+        :if ($attempt = 3) do={
+            :log warning "wan-monit: Link Offline, realizando troca de rotas";
+            /system script run wan-toggle;
+            :delay 30;
+            /system script run email-wan-toggle-report;
+            :set isFailed true;
+        }
+    } else={
+        :log info "wan-monit: Conexão WAN estável no teste $attempt";
+        :set isFailed true;
+    }
+    :delay $delayPeriod;
+    :set attempt ($attempt + 1);
+}
+
