@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from dotenv import load_dotenv
 import os
 import paramiko
@@ -23,23 +23,31 @@ def execute_script(script_name):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ROUTER_IP, username=ROUTER_USER, password=ROUTER_PASSWORD)
+        ssh.connect(ROUTER_IP, username=ROUTER_USER, password=ROUTER_PASSWORD,
+                    look_for_keys=False, timeout=10, allow_agent=False)
         stdin, stdout, stderr = ssh.exec_command(f'/system script run {script_name}')
         output = stdout.read().decode()
         error = stderr.read().decode()
         ssh.close()
-        return output, error
+        if error:
+            return error
+        if output:
+            return output
+        return None
     except Exception as e:
-        return str(e), ""
+        return str(e)
 
 @app.route('/')
 def index():
-    return render_template('index.html', isp=current_isp, wan1_name=WAN1_NAME, wan2_name=WAN2_NAME)
+    error = request.args.get('error')
+    return render_template('index.html', isp=current_isp, wan1_name=WAN1_NAME, wan2_name=WAN2_NAME, error=error)
 
 @app.route('/toggle')
 def toggle_isp():
     global current_isp
-    output, error = execute_script(SCRIPT_TOGGLE)
+    error = execute_script(SCRIPT_TOGGLE)
+    if error:
+        return redirect(url_for('index', error=error))
     if current_isp == WAN1_NAME:
         current_isp = WAN2_NAME
     else:
@@ -50,10 +58,14 @@ def toggle_isp():
 def set_isp(wan):
     global current_isp
     if wan == 'WAN1':
-        output, error = execute_script(SCRIPT_WAN1)
+        error = execute_script(SCRIPT_WAN1)
+        if error:
+            return redirect(url_for('index', error=error))
         current_isp = WAN1_NAME
     elif wan == 'WAN2':
-        output, error = execute_script(SCRIPT_WAN2)
+        error = execute_script(SCRIPT_WAN2)
+        if error:
+            return redirect(url_for('index', error=error))
         current_isp = WAN2_NAME
     return redirect(url_for('index'))
 
