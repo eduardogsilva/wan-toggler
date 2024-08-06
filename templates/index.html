@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAN Toggler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>WAN Toggler</h1>
+        <p>Current ISP: <strong>{{ isp }}</strong></p>
+        <div class="buttons">
+            <form action="{{ url_for('toggle_isp') }}" method="get">
+                <button type="submit" class="button">Toggle ISP</button>
+            </form>
+            <form action="{{ url_for('set_isp', wan='WAN1') }}" method="get">
+                <button type="submit" class="button">Set {{ wan1_name }}</button>
+            </form>
+            <form action="{{ url_for('set_isp', wan='WAN2') }}" method="get">
+                <button type="submit" class="button">Set {{ wan2_name }}</button>
+            </form>
+            <form action="{{ url_for('index') }}" method="get">
+                <button type="submit" class="button">Check ISP</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
