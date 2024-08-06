@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 import paramiko
 
-load_dotenv()  # Carrega as variáveis do arquivo .env
+load_dotenv()
 
 app = Flask(__name__)
 
