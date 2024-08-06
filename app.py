@@ -23,6 +23,7 @@ ROUTER_IP = os.getenv('ROUTER_IP')
 ROUTER_USER = os.getenv('ROUTER_USER')
 ROUTER_PASSWORD = os.getenv('ROUTER_PASSWORD')
 
+
 def execute_script(script_name):
     try:
         ssh = paramiko.SSHClient()
